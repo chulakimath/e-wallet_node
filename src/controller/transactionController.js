@@ -53,11 +53,7 @@ export const getSummaryByUserId = async (req, res) => {
     try {
         let { user_id } = req.params;
         let original_id = user_id;
-        user_id = parseInt(user_id);
-        if (isNaN(user_id)) {
-            return res.status(400).json({ message: `${original_id} is not valid user id` });
-        }
-
+     
 
 
         const summary = await sql`SELECT  
