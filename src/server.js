@@ -10,7 +10,7 @@ import job from "./config/cron.js";
 dotenv.config();
 
 const app = express();
-if(process.env.NODE_ENV=="production")job.start()
+job.start()
 const PORT = process.env.PORT ?? 5001;
 app.use(ratelimiter);
 app.use(express.json());
