@@ -1,8 +1,9 @@
 import { sql } from "../config/db.js";
 export const getTransactionByUserId = async (req, res) => {
     try {
-        const { user_id } = req.params;
-        const usertransactions = await sql`SELECT * FROM transactions WHERE user_id=${user_id} ORDER BY created_at DESC`;
+        // const { user_id } = req.params;
+        const { id, email } = req.user;
+        const usertransactions = await sql`SELECT * FROM transactions WHERE user_id=${id} ORDER BY created_at DESC`;
         res.status(200).json({ message: "success", data: usertransactions })
     } catch (error) {
         console.log("get_transaction_by_id", error);
@@ -31,15 +32,15 @@ export const deleteTransactionByRowId = async (req, res) => {
 }
 
 export const createTransactionById = async (req, res) => {
-
+    const { id, email } = req.user;
     try {
-        const { user_id, amount, title, category } = req.body ?? {}
-        if (!user_id || amount == undefined || !title || !category) {
+        const { amount, title, category } = req.body ?? {}
+        if ( amount == undefined || !title || !category) {
             return res.status(400).json({ message: "Missing info" });
         }
         const response = await sql`
             INSERT INTO transactions(user_id,title,amount,category) 
-            VALUES (${user_id},${title},${amount},${category})
+            VALUES (${id},${title},${amount},${category})
             RETURNING *
         `;
         res.status(201).json({ message: "Created", data: response });
@@ -51,9 +52,11 @@ export const createTransactionById = async (req, res) => {
 
 export const getSummaryByUserId = async (req, res) => {
     try {
-        let { user_id } = req.params;
-        let original_id = user_id;
-     
+        // let { user_id } = req.params;
+        const { id, email } = req.user;
+        let original_id = id;
+        
+
 
 
         const summary = await sql`SELECT  
@@ -61,7 +64,7 @@ export const getSummaryByUserId = async (req, res) => {
         COALESCE(SUM(CASE WHEN amount>0 THEN amount ELSE 0 END),0) as income,
         COALESCE(SUM(CASE WHEN amount<0 THEN amount ELSE 0 END),0) as expnse
         FROM transactions 
-        WHERE user_id=${user_id}`;
+        WHERE user_id=${id}`;
         res.status(200).json({ message: "success", status: 1, data: summary });
 
     } catch (error) {
